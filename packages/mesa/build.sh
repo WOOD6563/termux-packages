@@ -31,6 +31,7 @@ TERMUX_PKG_EXTRA_CONFIGURE_ARGS="
 -Dshared-llvm=enabled
 -Dplatforms=x11,wayland
 -Dgallium-drivers=panfrost,llvmpipe,softpipe,virgl,zink
+-Dvulkan-drivers=[]
 -Dgallium-rusticl=true
 -Dglvnd=enabled
 -Dxmlconfig=disabled
@@ -48,7 +49,6 @@ termux_step_post_get_source() {
 
 termux_step_pre_configure() {
 	if [ "$TERMUX_PKG_API_LEVEL" -lt 29 ]; then
-		# ELF TLS is supported starting with API level 29.
 		patch --silent -p1 < "$TERMUX_PKG_BUILDER_DIR/0011-lld-undefined-version.diff"
 	fi
 
@@ -82,12 +82,8 @@ termux_step_pre_configure() {
 	export LLVM_CONFIG="${TERMUX_PREFIX}/bin/llvm-config"
 	export PATH="${_WRAPPER_BIN}:${CARGO_HOME}/bin:${PATH}"
 
-	local _vk_drivers="swrast"
-	if [ $TERMUX_ARCH = "arm" ] || [ $TERMUX_ARCH = "aarch64" ]; then
-		_vk_drivers+=",freedreno"
-		TERMUX_PKG_EXTRA_CONFIGURE_ARGS+=" -Dfreedreno-kmds=msm,kgsl"
-	fi
-	TERMUX_PKG_EXTRA_CONFIGURE_ARGS+=" -Dvulkan-drivers=$_vk_drivers"
+	TERMUX_PKG_EXTRA_CONFIGURE_ARGS+=" -Dvulkan-drivers='' -Dgallium-rusticl=false -Dopencl=false -Dgallium-opencl=false"
+	TERMUX_PKG_EXTRA_CONFIGURE_ARGS+=" -Dgallium-drivers=panfrost,llvmpipe,softpipe,virgl,zink"
 }
 
 termux_step_post_configure() {
