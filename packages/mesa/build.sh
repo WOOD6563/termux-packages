@@ -31,6 +31,7 @@ TERMUX_PKG_EXTRA_CONFIGURE_ARGS="
 -Dshared-llvm=enabled
 -Dplatforms=x11,wayland
 -Dgallium-drivers=panfrost,llvmpipe,softpipe,virgl,zink
+-Dvulkan-drivers=[]
 -Dgallium-rusticl=true
 -Dglvnd=enabled
 -Dxmlconfig=disabled
