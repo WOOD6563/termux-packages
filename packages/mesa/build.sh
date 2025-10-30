@@ -82,7 +82,7 @@ termux_step_pre_configure() {
 	export LLVM_CONFIG="${TERMUX_PREFIX}/bin/llvm-config"
 	export PATH="${_WRAPPER_BIN}:${CARGO_HOME}/bin:${PATH}"
 
-	TERMUX_PKG_EXTRA_CONFIGURE_ARGS+=" -Dvulkan-drivers= -Dgallium-rusticl=false -Dgallium-opencl=disabled"
+	TERMUX_PKG_EXTRA_CONFIGURE_ARGS+=" -Dvulkan-drivers= -Dgallium-rusticl=false"
 	TERMUX_PKG_EXTRA_CONFIGURE_ARGS+=" -Dgallium-drivers=panfrost,llvmpipe,softpipe,virgl,zink"
 }
 
