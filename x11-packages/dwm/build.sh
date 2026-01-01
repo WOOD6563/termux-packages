@@ -10,7 +10,8 @@ TERMUX_PKG_DEPENDS="dmenu, fontconfig, libx11, libxft, libxinerama, st"
 TERMUX_PKG_BUILD_IN_SRC=true
 
 termux_step_pre_configure() {
-    wget https://dwm.suckless.org/patches/autostart/dwm-autostart-20161205-bb3bd6f.diff
-    patch -p1 < dwm-autostart-20161205-bb3bd6f.diff
-    cp config.def.h config.h
+	wget -O autostart.diff \
+		https://dwm.suckless.org/patches/autostart/dwm-autostart-20161205-bb3bd6f.diff
+	patch -p1 < autostart.diff
+	cp config.def.h config.h
 }
