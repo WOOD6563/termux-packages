@@ -10,5 +10,7 @@ TERMUX_PKG_DEPENDS="dmenu, fontconfig, libx11, libxft, libxinerama, st"
 TERMUX_PKG_BUILD_IN_SRC=true
 
 termux_step_pre_configure() {
-	cp config.def.h config.h
+    patch -p1 < "$TERMUX_PKG_BUILDER_DIR/dwm-autostart-20161205-bb3bd6f.diff"
+
+    cp config.def.h config.h
 }
