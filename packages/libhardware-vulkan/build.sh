@@ -1,5 +1,7 @@
 TERMUX_PKG_DESCRIPTION="load linked drivers from a different folder fe vulkan.ums9230.so -> ../egl/libGLES_mali.so"
 TERMUX_PKG_VERSION=1.0
+TERMUX_PKG_HOMEPAGE="https://github.com/john-peterson/platform_hardware_libhardware"
+TERMUX_PKG_MAINTAINER="WOOD6563 <https://github.com/WOOD6563>"
 TERMUX_PKG_LICENSE="WTFPL"
 TERMUX_PKG_SRCURL=(
 # git+$HOME/libhardware
