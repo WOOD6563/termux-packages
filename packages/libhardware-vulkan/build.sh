@@ -75,7 +75,3 @@ termux_step_extract_into_massagedir() {
 	# this is trying to tar my entire system
 	:;
 }
-
-# termux_step_post_massage() { :; }
-
-
