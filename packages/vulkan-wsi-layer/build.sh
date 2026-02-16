@@ -15,7 +15,6 @@ TERMUX_PKG_EXTRA_CONFIGURE_ARGS="
 
 termux_step_post_get_source() {
 	git fetch --unshallow
-	git checkout $_COMMIT
 
 	local version="$(printf "0.0.1-r%d.%s" \
 		"$(git rev-list --count HEAD)" \
