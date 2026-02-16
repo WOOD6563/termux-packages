@@ -18,15 +18,23 @@ termux_step_post_get_source() {
 	git fetch --unshallow
 	git checkout $_COMMIT
 
-	local version="$(printf "0.0.1-r%d.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)")"
+	local version="$(printf "0.0.1-r%d.%s" \
+		"$(git rev-list --count HEAD)" \
+		"$(git rev-parse --short HEAD)")"
+
 	if [ "$version" != "$TERMUX_PKG_VERSION" ]; then
 		echo -n "ERROR: The specified version \"$TERMUX_PKG_VERSION\""
 		echo " is different from what is expected to be: \"$version\""
 		return 1
 	fi
 
-	local s=$(find . -type f ! -path '*/.git/*' -print0 | xargs -0 sha256sum | LC_ALL=C sort | sha256sum)
-    echo "$s"
+	local s=$(find . -type f ! -path '*/.git/*' -print0 \
+		| xargs -0 sha256sum \
+		| LC_ALL=C sort \
+		| sha256sum)
+
+	echo "$s"
+
 	if [[ "${s}" != "${TERMUX_PKG_SHA256}  "* ]]; then
 		termux_error_exit "Checksum mismatch for source files."
 	fi
