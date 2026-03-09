@@ -3,9 +3,10 @@ TERMUX_PKG_DESCRIPTION="Ambitious Vim-fork focused on extensibility and agility 
 TERMUX_PKG_LICENSE="Apache-2.0, VIM License"
 TERMUX_PKG_LICENSE_FILE="LICENSE.txt"
 TERMUX_PKG_MAINTAINER="Joshua Kahn <tom@termux.dev>"
-TERMUX_PKG_VERSION="0.12.0~dev-2306+gf8d59cfab9"
+TERMUX_PKG_VERSION="0.12.0~dev-2508+g61f166ec40"
 TERMUX_PKG_SRCURL="https://github.com/neovim/neovim/archive/${TERMUX_PKG_VERSION##*+g}.tar.gz"
-TERMUX_PKG_SHA256=3f44430daf88c05e0419bf8e17649793c89a0dba18f86fe995586ea903179e74
+TERMUX_PKG_SHA256=3daa4f0f14577517d37a4e9c825bcdbe87645ff708971a1c5ded042e14d28a78
+TERMUX_PKG_REPOLOGY_METADATA_VERSION="${TERMUX_PKG_VERSION%%~*}"
 TERMUX_PKG_DEPENDS="libandroid-support, libiconv, libmsgpack, libunibilium, libuv, libvterm (>= 1:0.3-0), lua51-lpeg, luajit, luv, tree-sitter, tree-sitter-parsers, utf8proc"
 TERMUX_PKG_BREAKS="neovim"
 TERMUX_PKG_CONFLICTS="neovim"
@@ -20,6 +21,11 @@ TERMUX_PKG_EXTRA_CONFIGURE_ARGS="
 -DLUAJIT_INCLUDE_DIR=$TERMUX_PREFIX/include/luajit-2.1
 -DLPEG_LIBRARY=$TERMUX_PREFIX/lib/liblpeg-5.1.so
 -DCOMPILE_LUA=OFF
+"
+
+# Available since 0.12.0~dev-2459+g62135f5a57
+TERMUX_PKG_EXTRA_CONFIGURE_ARGS+="
+-DNLUA0_HOST_PRG=$TERMUX_PKG_HOSTBUILD_DIR/libnlua0.so
 "
 
 termux_pkg_auto_update() {

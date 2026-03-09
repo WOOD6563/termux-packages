@@ -2,9 +2,9 @@ TERMUX_PKG_HOMEPAGE=https://www.chromium.org/Home
 TERMUX_PKG_DESCRIPTION="Chromium web browser"
 TERMUX_PKG_LICENSE="BSD 3-Clause"
 TERMUX_PKG_MAINTAINER="@licy183"
-TERMUX_PKG_VERSION=145.0.7632.45
+TERMUX_PKG_VERSION="145.0.7632.159"
 TERMUX_PKG_SRCURL=https://commondatastorage.googleapis.com/chromium-browser-official/chromium-$TERMUX_PKG_VERSION-lite.tar.xz
-TERMUX_PKG_SHA256=a7ce8bd85d36e6c01d382e71c9018b0d118553a848e32dd399aea2e437476be1
+TERMUX_PKG_SHA256=12e53b149f7621ee0741d25005a8d7e79cf95ce13efc4063fda04b4db6c882f1
 TERMUX_PKG_DEPENDS="atk, cups, dbus, fontconfig, gtk3, krb5, libc++, libevdev, libxkbcommon, libminizip, libnss, libx11, mesa, openssl, pango, pulseaudio, zlib"
 TERMUX_PKG_BUILD_DEPENDS="chromium-host-tools, libffi-static"
 # TODO: Split chromium-common and chromium-headless
@@ -14,7 +14,6 @@ TERMUX_PKG_BUILD_DEPENDS="chromium-host-tools, libffi-static"
 TERMUX_PKG_EXCLUDED_ARCHES="i686"
 TERMUX_PKG_AUTO_UPDATE=false
 TERMUX_PKG_ON_DEVICE_BUILD_NOT_SUPPORTED=true
-TERMUX_PKG_AUTO_UPDATE=false
 
 SYSTEM_LIBRARIES="    fontconfig"
 # TERMUX_PKG_DEPENDS="fontconfig"
@@ -321,6 +320,9 @@ exclude_unwind_tables = false
 use_jumbo_build = true
 # Compile pdfium as a static library
 pdf_is_complete_lib = true
+# NDK r29 can't compile chromium with cxx23, see
+# https://github.com/termux/termux-packages/issues/28459#issuecomment-3991943697
+use_cxx23 = false
 " > $_common_args_file
 
 	if [ "$TERMUX_ARCH" = "arm" ]; then
