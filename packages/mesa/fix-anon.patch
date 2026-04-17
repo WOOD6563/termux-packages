@@ -1,0 +1,11 @@
+--- a/src/util/anon_file.c	2026-04-15 19:12:35.000000000 +0530
++++ b/src/util/anon_file.c	2026-04-17 14:05:11.892905126 +0530
+@@ -125,7 +125,7 @@
+         return buf;
+     }
+ 
+-    n = asprintf(&buf, "/tmp/xdg-runtime-mesa-%ld", (long)getuid());
++    n = asprintf(&buf, "@TERMUX_PREFIX@/tmp/xdg-runtime-mesa-%ld", (long)getuid());
+     if (n < 0)
+        return NULL;
+     mesa_logd("%s: XDG_RUNTIME_DIR not set; falling back to temp dir %s",
