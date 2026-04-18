@@ -1,0 +1,24 @@
+--- /src/vulkan/wrapper/wrapper_instance.c	2026-04-18 12:40:31.000000000 +0000
++++ /src/vulkan/wrapper/wrapper_instance.c	2026-04-18 12:50:24.000000000 +0000
+@@ -126,7 +126,9 @@
+       return  adrenotools_open_libvulkan(RTLD_NOW, flags, temp, hooks, path, name, redirect_dir, NULL);
+    }
+    else
+-      return dlopen(DEFAULT_VULKAN_PATH, RTLD_NOW | RTLD_LOCAL);
++      /* Allow overriding the Vulkan library path via environment variable */
++      const char *env_path = getenv("WRAPPER_VULKAN_PATH");
++      return dlopen(env_path ? env_path : DEFAULT_VULKAN_PATH, RTLD_NOW | RTLD_LOCAL);
+ }
+ 
+ 
+@@ -193,6 +195,10 @@
+ 
+    supported_instance_extensions->EXT_debug_utils = false;
+ 
++   /* Block extensions that don't work (required for Zink/Chromium compatibility). */
++   supported_instance_extensions->EXT_debug_report = false;
++   supported_instance_extensions->KHR_device_group_creation = false;
++
+    return VK_SUCCESS;
+ }
+ 

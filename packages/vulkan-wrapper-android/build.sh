@@ -3,8 +3,11 @@ TERMUX_PKG_DESCRIPTION="Android Vulkan ICD"
 TERMUX_PKG_LICENSE="MIT"
 TERMUX_PKG_LICENSE_FILE="docs/license.rst"
 TERMUX_PKG_MAINTAINER="xMeM <haooy@outlook.com>"
-TERMUX_PKG_VERSION="25.0.69"
-TERMUX_PKG_SHA256=df05ebfd13fbb7722424178596c5741f2922506ab469e7d5629a4b69470e440e
+TERMUX_PKG_VERSION="25.0.0"
+TERMUX_PKG_REVISION=2
+TERMUX_PKG_SRCURL=git+https://gitlab.freedesktop.org/Pipetto-crypto/mesa
+TERMUX_PKG_GIT_BRANCH=wrapper-25
+_COMMIT=c88b0b6c70f422e3e6446d98e57868e0b801d313
 TERMUX_PKG_DEPENDS="libandroid-shmem, libc++, libdrm, libx11, libxcb, libxshmfence, libwayland, vulkan-loader-generic, zlib, zstd"
 TERMUX_PKG_BUILD_DEPENDS="libwayland-protocols, libxrandr, xorgproto"
 TERMUX_PKG_API_LEVEL=26
@@ -22,6 +25,12 @@ TERMUX_PKG_EXTRA_CONFIGURE_ARGS="
 -Dvulkan-drivers=wrapper
 -Db_ndebug=true
 "
+
+termux_step_post_get_source() {
+	git fetch --unshallow
+	git checkout $_COMMIT
+	# Do not use meson wrap projects
+}
 
 termux_step_pre_configure() {
 	termux_setup_cmake
