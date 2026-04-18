@@ -3,11 +3,8 @@ TERMUX_PKG_DESCRIPTION="Android Vulkan ICD"
 TERMUX_PKG_LICENSE="MIT"
 TERMUX_PKG_LICENSE_FILE="docs/license.rst"
 TERMUX_PKG_MAINTAINER="xMeM <haooy@outlook.com>"
-TERMUX_PKG_VERSION="25.0.0"
-TERMUX_PKG_REVISION=2
-TERMUX_PKG_SRCURL=git+https://github.com/WOOD6563/mesa
-TERMUX_PKG_GIT_BRANCH=wrapper
-_COMMIT=a1e63bc2b5bce9516c556e7f02f67f2a4496ceab
+TERMUX_PKG_VERSION="25.0.69"
+TERMUX_PKG_SHA256=df05ebfd13fbb7722424178596c5741f2922506ab469e7d5629a4b69470e440e
 TERMUX_PKG_DEPENDS="libandroid-shmem, libc++, libdrm, libx11, libxcb, libxshmfence, libwayland, vulkan-loader-generic, zlib, zstd"
 TERMUX_PKG_BUILD_DEPENDS="libwayland-protocols, libxrandr, xorgproto"
 TERMUX_PKG_API_LEVEL=26
@@ -25,13 +22,6 @@ TERMUX_PKG_EXTRA_CONFIGURE_ARGS="
 -Dvulkan-drivers=wrapper
 -Db_ndebug=true
 "
-
-termux_step_post_get_source() {
-	git fetch --unshallow
-	git checkout $_COMMIT
-	# Do not use meson wrap projects
-	rm -rf subprojects
-}
 
 termux_step_pre_configure() {
 	termux_setup_cmake
