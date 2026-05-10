@@ -1,0 +1,83 @@
+From b943588ff7c2d4119718e1298e65bd7dd358d6b8 Mon Sep 17 00:00:00 2001
+From: Maksim Belov <ultramaksim@gmail.com>
+Date: Sun, 24 Aug 2025 15:28:16 +0300
+Subject: [PATCH 2/2] Fix[zink]: fixes for ARM Mali proprietary drivers
+
+Adapted for Mesa 26.1.0:
+  - have_relaxed_interface_matching added to struct ntv_info
+    (nir_to_spirv/nir_to_spirv.h) rather than zink_shader_info,
+    since ntv_info is now per-screen in 26.1.0.
+  - nir_lower_io_to_scalar guard uses screen->ntv_info and preserves
+    the scalarize_vars_instr_filter callback present in 26.1.0.
+  - VK_KHR_vulkan_memory_model gets alias + features=True in-place
+    (no longer needs moving between lists).
+  - Typos from original commit fixed:
+      ZINK_EANBLE_GS_ARM  -> ZINK_ENABLE_GS_ARM
+      vukan_memory_model  -> vulkan_memory_model
+---
+--- a/src/gallium/drivers/zink/nir_to_spirv/nir_to_spirv.h
++++ b/src/gallium/drivers/zink/nir_to_spirv/nir_to_spirv.h
+@@ -47,6 +47,7 @@
+ 
+ struct ntv_info {
+    bool have_vulkan_memory_model;
++   bool have_relaxed_interface_matching;
+    bool have_workgroup_memory_explicit_layout;
+    bool have_float_controls2;
+    bool broken_arbitary_type_const;
+--- a/src/gallium/drivers/zink/zink_device_info.py
++++ b/src/gallium/drivers/zink/zink_device_info.py
+@@ -87,7 +87,7 @@
+     Extension("VK_KHR_unified_image_layouts", alias="unified_layouts", features=True),
+     Extension("VK_KHR_external_memory"),
+     Extension("VK_KHR_external_memory_fd"),
+-    Extension("VK_KHR_vulkan_memory_model"),
++    Extension("VK_KHR_vulkan_memory_model", alias="vulkan_memory_model", features=True),
+     Extension("VK_KHR_workgroup_memory_explicit_layout", alias="explicit_layout", features=True),
+     Extension("VK_KHR_pipeline_executable_properties",
+               alias="pipestats",
+--- a/src/gallium/drivers/zink/zink_compiler.c
++++ b/src/gallium/drivers/zink/zink_compiler.c
+@@ -1358,7 +1358,8 @@
+                                                  BITFIELD_BIT(MESA_SHADER_FRAGMENT);
+    screen->nir_options.support_indirect_outputs = (uint8_t)BITFIELD_MASK(MESA_SHADER_STAGES);
+ 
+-   screen->ntv_info.have_vulkan_memory_model = screen->info.have_KHR_vulkan_memory_model;
++   screen->ntv_info.have_vulkan_memory_model = screen->info.vulkan_memory_model_feats.vulkanMemoryModel;
++   screen->ntv_info.have_relaxed_interface_matching = screen->info.maint4_feats.maintenance4;
+    screen->ntv_info.have_workgroup_memory_explicit_layout = screen->info.have_KHR_workgroup_memory_explicit_layout;
+    screen->ntv_info.has_demote_to_helper = screen->info.have_EXT_shader_demote_to_helper_invocation;
+    screen->ntv_info.broken_arbitary_type_const = screen->driver_compiler_workarounds.broken_const;
+@@ -5637,8 +5638,13 @@
+       .location_mask = BITFIELD64_RANGE(VARYING_SLOT_CLIP_DIST0, 4) |
+                        BITFIELD64_RANGE(VARYING_SLOT_TESS_LEVEL_OUTER, 2)
+    };
+-   NIR_PASS(_, nir, nir_lower_io_to_scalar, nir_var_shader_in | nir_var_shader_out,
+-            scalarize_vars_instr_filter, (void*)&filter_data);
++   /* Workaround: nir_lower_io_to_scalar can create mismatched inputs/outputs between
++    * shader stages. Drivers without relaxed interface matching (VK_KHR_maintenance4)
++    * will fail to link such shaders — observed on ARM Mali proprietary. */
++   if (screen->ntv_info.have_relaxed_interface_matching) {
++      NIR_PASS(_, nir, nir_lower_io_to_scalar, nir_var_shader_in | nir_var_shader_out,
++               scalarize_vars_instr_filter, (void*)&filter_data);
++   }
+ 
+    if (!screen->info.feats.features.shaderClipDistance && nir->info.clip_distance_array_size) {
+       if (nir->info.stage == MESA_SHADER_FRAGMENT)
+--- a/src/gallium/drivers/zink/zink_screen.c
++++ b/src/gallium/drivers/zink/zink_screen.c
+@@ -3491,6 +3491,14 @@
+       goto fail;
+    }
+ 
++   if (zink_driverid(screen) == VK_DRIVER_ID_ARM_PROPRIETARY) {
++      const char *mali_geom_override = getenv("ZINK_ENABLE_GS_ARM");
++      bool geomShader = mali_geom_override != NULL && *mali_geom_override == '1';
++      printf("ZINK: ARM Mali detected, geometry shaders are %s\n",
++             geomShader ? "enabled (override)" : "forcibly disabled");
++      screen->info.feats.features.geometryShader = geomShader;
++   }
++
+    if (zink_set_driver_strings(screen)) {
+       mesa_loge("ZINK: failed to set driver strings\n");
+       goto fail;
