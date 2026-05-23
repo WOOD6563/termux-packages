@@ -1,5 +1,6 @@
-+++ ./src/vulkan/wsi/wsi_common_display.c
-@@ -176,6 +176,12 @@
+--- a/src/vulkan/wsi/wsi_common_display.c	2026-05-19 14:27:16.000000000 +0000
++++ b/src/vulkan/wsi/wsi_common_display.c	2026-05-23 12:25:05.441316978 +0000
+@@ -542,6 +542,12 @@
  
  static uint64_t fence_sequence;
  
@@ -9,10 +10,10 @@
 +}
 +#endif
 +
- ICD_DEFINE_NONDISP_HANDLE_CASTS(wsi_display_mode, VkDisplayModeKHR)
- ICD_DEFINE_NONDISP_HANDLE_CASTS(wsi_display_connector, VkDisplayKHR)
+ static void
+ _wsi_display_cleanup_state(struct wsi_display_swapchain *chain);
  
-@@ -1341,7 +1347,9 @@
+@@ -2058,7 +2064,9 @@
        .events = POLLIN
     };
  
@@ -22,7 +23,7 @@
     for (;;) {
        int ret = poll(&pollfd, 1, -1);
        if (ret > 0) {
-@@ -1369,9 +1377,22 @@
+@@ -2086,9 +2094,22 @@
  static void
  wsi_display_stop_wait_thread(struct wsi_display *wsi)
  {
@@ -45,7 +46,7 @@
        pthread_join(wsi->wait_thread, NULL);
        wsi->wait_thread = 0;
     }
-@@ -2215,7 +2236,9 @@
+@@ -3517,7 +3538,9 @@
  
     int udev_fd = udev_monitor_get_fd(mon);
  
@@ -55,9 +56,9 @@
  
     for (;;) {
        nfds_t nfds = 1;
-@@ -2340,6 +2363,15 @@
-    struct wsi_display *wsi =
-       (struct wsi_display *) wsi_device->wsi[VK_ICD_WSI_PLATFORM_DISPLAY];
+@@ -3681,8 +3704,21 @@
+ 
+       wsi_display_stop_wait_thread(wsi);
  
 +#ifdef __ANDROID__
 +   struct sigaction actions;
@@ -68,12 +69,6 @@
 +   sigaction (SIGUSR2, &actions, NULL);
 +#endif
 +
-    if (wsi) {
-       wsi_for_each_connector(connector, wsi) {
-          wsi_for_each_display_mode(mode, connector) {
-@@ -2351,7 +2383,11 @@
-       wsi_display_stop_wait_thread(wsi);
- 
        if (wsi->hotplug_thread) {
 +#ifndef __ANDROID__
           pthread_cancel(wsi->hotplug_thread);

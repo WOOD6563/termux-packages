@@ -1,5 +1,6 @@
-+++ ./meson.build
-@@ -1480,9 +1480,8 @@ if not ['linux'].contains(host_machine.system())
+--- a/meson.build	2026-05-19 14:27:16.000000000 +0000
++++ b/meson.build	2026-05-23 12:24:41.287887727 +0000
+@@ -1516,9 +1516,8 @@
    endif
  endif
  

@@ -1,13 +1,11 @@
-Fallback to `@TERMUX_PREFIX@/tmp` if env `XDG_RUNTIME_DIR` is not set.
-
---- a/src/util/anon_file.c
-+++ b/src/util/anon_file.c
-@@ -122,7 +122,7 @@ get_or_create_user_temp_dir(char* buf, size_t len) {
+--- a/src/util/anon_file.c	2026-05-19 14:27:16.000000000 +0000
++++ b/src/util/anon_file.c	2026-05-23 12:24:33.597205473 +0000
+@@ -125,7 +125,7 @@
          return buf;
      }
  
--    snprintf(buf, len, "/tmp/xdg-runtime-mesa-%ld", (long)getuid());
-+    snprintf(buf, len, "@TERMUX_PREFIX@/tmp/xdg-runtime-mesa-%ld", (long)getuid());
+-    n = asprintf(&buf, "/tmp/xdg-runtime-mesa-%ld", (long)getuid());
++    n = asprintf(&buf, "@TERMUX_PREFIX@/tmp/xdg-runtime-mesa-%ld", (long)getuid());
+     if (n < 0)
+        return NULL;
      mesa_logd("%s: XDG_RUNTIME_DIR not set; falling back to temp dir %s",
-         __func__, buf);
-     if (stat(buf, &st) == 0) {
