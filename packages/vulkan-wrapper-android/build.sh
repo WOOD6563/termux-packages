@@ -54,9 +54,27 @@ termux_step_pre_configure() {
 }
 
 termux_step_pre_configure() {
-	rm -rf $TERMUX_PREFIX/lib/python${TERMUX_PYTHON_VERSION}/__pycache__
-}
+    # Original pre-configure setup
+    termux_setup_cmake
 
-termux_step_post_configure() {
-	rm -f $_WRAPPER_BIN/cmake
+    if [ "$TERMUX_ON_DEVICE_BUILD" = "true" ]; then
+        CFLAGS+=" --target=$TERMUX_HOST_PLATFORM$TERMUX_PKG_API_LEVEL"
+    fi
+
+    CPPFLAGS+=" -D__USE_GNU"
+    CPPFLAGS+=" -U__ANDROID__"
+    LDFLAGS+=" -landroid-shmem"
+
+    _WRAPPER_BIN=$TERMUX_PKG_BUILDDIR/_wrapper/bin
+    mkdir -p $_WRAPPER_BIN
+    if [ "$TERMUX_ON_DEVICE_BUILD" = "false" ]; then
+        sed 's|@CMAKE@|'"$(command -v cmake)"'|g' \
+            $TERMUX_PKG_BUILDER_DIR/cmake-wrapper.in \
+            >$_WRAPPER_BIN/cmake
+        chmod 0700 $_WRAPPER_BIN/cmake
+    fi
+    export PATH=$_WRAPPER_BIN:$PATH
+
+    # Python cache cleanup
+    rm -rf $TERMUX_PREFIX/lib/python${TERMUX_PYTHON_VERSION}/__pycache__
 }
