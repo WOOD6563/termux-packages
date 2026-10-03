@@ -1,0 +1,47 @@
+--- a/src/vulkan/wrapper/wrapper_physical_device.c
++++ b/src/vulkan/wrapper/wrapper_physical_device.c
+@@ -382,7 +382,6 @@
+ wrapper_GetPhysicalDeviceProperties(VkPhysicalDevice physicalDevice,
+                                     VkPhysicalDeviceProperties *pProperties)
+ {
+-   char *device_name;
+    uint32_t device_id;
+    uint32_t vendor_id;
+    
+@@ -392,9 +391,10 @@
+    pdevice->dispatch_table.GetPhysicalDeviceProperties(
+       pdevice->dispatch_handle, pProperties);
+ 
+-   char *device_name_env = getenv("WRAPPER_DEVICE_NAME");
+-   asprintf(&device_name, "Wrapper(%s)", (device_name_env) ? device_name_env : pProperties->deviceName);
+-   strcpy(pProperties->deviceName, device_name);
++   const char *device_name_env = getenv("WRAPPER_DEVICE_NAME");
++   if (device_name_env)
++      snprintf(pProperties->deviceName, sizeof(pProperties->deviceName),
++               "%s", device_name_env);
+ 
+    device_id = getenv("WRAPPER_DEVICE_ID") ? atoi(getenv("WRAPPER_DEVICE_ID")) : 0;
+    vendor_id = getenv("WRAPPER_VENDOR_ID") ? atoi(getenv("WRAPPER_VENDOR_ID")) : 0;
+@@ -415,7 +415,6 @@
+ {
+    uint32_t device_id;
+    uint32_t vendor_id;
+-   char *device_name;
+    char *driver_info;
+    uint32_t driver_id;
+    
+@@ -425,9 +424,11 @@
+    pdevice->dispatch_table.GetPhysicalDeviceProperties2(
+       pdevice->dispatch_handle, pProperties);
+ 
+-   char *device_name_env = getenv("WRAPPER_DEVICE_NAME");
+-   asprintf(&device_name, "Wrapper(%s)", (device_name_env) ? device_name_env : pProperties->properties.deviceName);   
+-   strcpy(pProperties->properties.deviceName, device_name);
++   const char *device_name_env = getenv("WRAPPER_DEVICE_NAME");
++   if (device_name_env)
++      snprintf(pProperties->properties.deviceName,
++               sizeof(pProperties->properties.deviceName), "%s",
++               device_name_env);
+ 
+    device_id = getenv("WRAPPER_DEVICE_ID") ? atoi(getenv("WRAPPER_DEVICE_ID")) : 0;
+    vendor_id = getenv("WRAPPER_VENDOR_ID") ? atoi(getenv("WRAPPER_VENDOR_ID")) : 0;
