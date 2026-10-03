@@ -7,7 +7,7 @@ TERMUX_PKG_VERSION="25.0.0"
 TERMUX_PKG_REVISION=2
 TERMUX_PKG_SRCURL=git+https://github.com/Pipetto-crypto/mesa
 TERMUX_PKG_GIT_BRANCH=wrapper-25
-_COMMIT=7eae6442f5d8a7414e66adc0d42857c143f20fa9
+_COMMIT=ecdd0da8c47b67892b0077130a0152ba924919cb
 # Fetched by hand in termux_step_post_get_source instead of letting meson
 # resolve subprojects/libadrenotools.wrap, so that our patches can be applied
 # to it by termux_step_patch_package.
