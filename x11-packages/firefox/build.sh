@@ -2,11 +2,11 @@ TERMUX_PKG_HOMEPAGE=https://www.mozilla.org/firefox
 TERMUX_PKG_DESCRIPTION="Mozilla Firefox web browser"
 TERMUX_PKG_LICENSE="MPL-2.0"
 TERMUX_PKG_MAINTAINER="@termux"
-TERMUX_PKG_VERSION="155.0.1"
+TERMUX_PKG_VERSION="160.0.1"
 TERMUX_PKG_SRCURL="https://archive.mozilla.org/pub/firefox/releases/${TERMUX_PKG_VERSION#*really}/source/firefox-${TERMUX_PKG_VERSION#*really}.source.tar.xz"
-TERMUX_PKG_SHA256=7548acd4788d4d0dce7ef9e14e62f7041df8746d9cfe4c05e923747954370d13
+TERMUX_PKG_SHA256=7b9d95ddf24f7bbf5d0d05698bc02a66dac1eca438f80e093c5c76af7648b06d
 # ffmpeg and pulseaudio are dependencies through dlopen(3):
-TERMUX_PKG_DEPENDS="ffmpeg, fontconfig, freetype, gdk-pixbuf, glib, gtk3, libandroid-shmem, libandroid-spawn, libc++, libcairo, libevent, libffi, libice, libicu, libjpeg-turbo, libnspr, libnss, libpixman, libsm, libvpx, libwebp, libx11, libxcb, libxcomposite, libxdamage, libxext, libxfixes, libxrandr, libxtst, pango, pulseaudio, zlib"
+TERMUX_PKG_DEPENDS="ffmpeg, fontconfig, freetype, gdk-pixbuf, glib, gtk3, libandroid-shmem, libandroid-spawn, libc++, libcairo, libevent, libffi, libice, libicu, libjpeg-turbo, libnspr, libnss, libpixman, libsm, libvpx, libwayland, libwebp, libx11, libxcb, libxcomposite, libxdamage, libxext, libxfixes, libxkbcommon, libxrandr, libxtst, pango, pulseaudio, zlib"
 TERMUX_PKG_BUILD_DEPENDS="libcpufeatures, libice, libsm"
 TERMUX_PKG_BUILD_IN_SRC=true
 TERMUX_PKG_AUTO_UPDATE=true
@@ -53,14 +53,6 @@ termux_step_post_get_source() {
 	local f="media/ffvpx/config_unix_aarch64.h"
 	echo "Applying sed substitution to ${f}"
 	sed -E '/^#define (CONFIG_LINUX_PERF|HAVE_SYSCTL) /s/1$/0/' -i ${f}
-
-	# Update Cargo.toml to use the patched cc
-	sed -i 's|^\(\[patch\.crates-io\]\)$|\1\ncc = { path = "third_party/rust/cc" }|g' \
-		Cargo.toml
-	(
-		termux_setup_rust
-		cargo update -p cc
-	)
 }
 
 termux_step_pre_configure() {
@@ -93,6 +85,10 @@ termux_step_pre_configure() {
 	if [ "$TERMUX_ARCH" = "arm" ]; then
 		# For symbol android_getCpuFeatures
 		LDFLAGS+=" -l:libndk_compat.a"
+	fi
+
+	if [ "$TERMUX_ARCH" = "i686" ]; then
+		CXXFLAGS+=" -DLIBYUV_DISABLE_X86"
 	fi
 }
 
@@ -127,6 +123,7 @@ termux_step_make_install() {
 	./mach install
 
 	install -Dm644 -t "${TERMUX_PREFIX}/share/applications" "${TERMUX_PKG_BUILDER_DIR}/firefox.desktop"
+	sed -i "s|@TERMUX_PREFIX@|${TERMUX_PREFIX}|g" "${TERMUX_PREFIX}/share/applications/firefox.desktop"
 
 	# Install icons as Arch Linux does
 	local i theme=official

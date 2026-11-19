@@ -11,7 +11,7 @@ while read -r number title; do
 	cached_issues["$number"]="'${title}'" # extra quotes avoid false positive substring matches
 done < <(
 	gh issue list \
-		--limit 10000 \
+		--limit 100000 \
 		--label "file conflict" --label "bot" \
 		--state open \
 		--search "File conflict: in:title type:issue" \
@@ -64,7 +64,7 @@ for key in "${!pair_paths[@]}"; do
 		cat <<-EOF
 			Hi, I'm Termux 🤖.
 
-			[${pkg_a}](../../tree/master/$(pkg_dir "$pkg_a")) and [${pkg_b}](../../tree/master/$(pkg_dir "$pkg_b")) both ship the following file(s), with no Conflicts/Replaces/Breaks declared between them:
+			[${pkg_a}](../tree/master/$(pkg_dir "$pkg_a")) and [${pkg_b}](../tree/master/$(pkg_dir "$pkg_b")) both ship the following file(s), with no Conflicts/Replaces/Breaks declared between them:
 
 			\`\`\`
 			${pair_paths[$key]}

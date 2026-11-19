@@ -2,9 +2,9 @@ TERMUX_PKG_HOMEPAGE=https://nextjs.org/
 TERMUX_PKG_DESCRIPTION="Rust-based incremental compilation engine and bundler for Next.js"
 TERMUX_PKG_MAINTAINER="@termux"
 TERMUX_PKG_LICENSE="MIT"
-TERMUX_PKG_VERSION="16.3.1"
+TERMUX_PKG_VERSION="16.4.6"
 TERMUX_PKG_SRCURL=https://github.com/vercel/next.js/archive/refs/tags/v${TERMUX_PKG_VERSION//\~/-}.tar.gz
-TERMUX_PKG_SHA256=b14fd7648da2039295796d0ad1aedc5471fddd54659e62c98e2de313ad2de6d1
+TERMUX_PKG_SHA256=248d0ea591b75872ae83215f17c244fa107172cd4a3870a6bcababa20d4ceb26
 TERMUX_PKG_BUILD_IN_SRC=true
 TERMUX_PKG_EXCLUDED_ARCHES="arm, i686"
 TERMUX_PKG_DEPENDS="ca-certificates"
@@ -23,14 +23,16 @@ termux_step_make() {
 	local ENV_PREFIX=$(echo "$CARGO_TARGET_NAME" | tr '[:lower:]-' '[:upper:]_')
 	if [ "$TERMUX_ARCH" == "aarch64" ]; then
 		export RUSTFLAGS+=" -Zshare-generics=y -Csymbol-mangling-version=v0"
-		npm i -g "@napi-rs/cli@2.18.4" # Hardcoded NAPI_CLI_VERSION from workflow
 	else
 		export "CARGO_TARGET_${ENV_PREFIX}_LINKER"="$CC"
 		export "CC_${CARGO_TARGET_NAME//-/_}"="$CC"
 	fi
-	npx --yes pnpm install --no-frozen-lockfile --ignore-scripts
+	local NAPI_DIR="$TERMUX_PKG_TMPDIR/napi"
+	mkdir -p "$NAPI_DIR"
+	npm install --prefix "$NAPI_DIR" "@napi-rs/cli@3.4.1"
+	export PATH="$NAPI_DIR/node_modules/.bin:$PATH"
 	cd packages/next-swc
-	npx --yes pnpm run build-native-release --target "$CARGO_TARGET_NAME"
+	node "$NAPI_DIR/node_modules/@napi-rs/cli/dist/cli.js" build --platform -p next-napi-bindings --manifest-path ../../Cargo.toml --release --features image-extended,tracing/release_max_level_trace --no-js -o native --target "$CARGO_TARGET_NAME"
 }
 
 termux_step_make_install() {

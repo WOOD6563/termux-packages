@@ -2,11 +2,12 @@ TERMUX_PKG_HOMEPAGE=https://mise.jdx.dev/
 TERMUX_PKG_DESCRIPTION="dev tools, env vars, task runner"
 TERMUX_PKG_LICENSE="MIT"
 TERMUX_PKG_MAINTAINER="@termux"
-TERMUX_PKG_VERSION="2026.9.8"
+TERMUX_PKG_VERSION="2026.11.10"
 TERMUX_PKG_SRCURL="https://github.com/jdx/mise/archive/refs/tags/v${TERMUX_PKG_VERSION}.tar.gz"
-TERMUX_PKG_SHA256=22061e52ef8e8500aa8c944e30717ef3dbd0aba3ef1457f5c986a78644d56fb9
+TERMUX_PKG_SHA256=46a75ec4b9d474fd292501129f1ead99502c44a17103f97677463a57eb623e52
 TERMUX_PKG_DEPENDS="bzip2, openssl"
 TERMUX_PKG_BUILD_IN_SRC=true
+TERMUX_PKG_MAKE_PROCESSES=1
 TERMUX_PKG_AUTO_UPDATE=true
 TERMUX_PKG_UPDATE_TAG_TYPE=latest-release-tag
 
@@ -14,12 +15,16 @@ termux_step_pre_configure() {
 	termux_setup_cmake
 	termux_setup_rust
 
+	# jitterentropy needs -O0, which -Oz in CFLAGS overrides
+	export AWS_LC_SYS_NO_JITTER_ENTROPY=1
+
 	# Dummy CMake toolchain file to workaround build error:
 	# error: failed to run custom build command for `libz-ng-sys v1.1.29`
 	# ...
 	# CMake Error at /home/builder/.termux-build/_cache/cmake-4.4.0/share/cmake-4.4/Modules/Platform/Android-Determine.cmake:217 (message):
 	# Android: Neither the NDK or a standalone toolchain was found.
 	export TARGET_CMAKE_TOOLCHAIN_FILE="${TERMUX_PKG_BUILDDIR}/android.toolchain.cmake"
+	export CARGO_TARGET_DIR="$(dirname "$TERMUX_PKG_SRCDIR")/cargo-target"
 	touch "${TERMUX_PKG_BUILDDIR}/android.toolchain.cmake"
 
 	# Vendor cargo deps to ./vendor-termux/ - not ./vendor/ - because mise's
@@ -31,6 +36,7 @@ termux_step_pre_configure() {
 	find ./vendor-termux \
 		-mindepth 1 -maxdepth 1 -type d \
 		! -wholename ./vendor-termux/cc \
+		! -wholename ./vendor-termux/rustls-platform-verifier \
 		! -wholename ./vendor-termux/sonic-rs \
 		! -wholename ./vendor-termux/sonic-simd \
 		-exec rm -rf '{}' \;
@@ -50,10 +56,17 @@ termux_step_pre_configure() {
 	echo "Applying patch: $patch"
 	patch -p1 -d "$dir" < "$patch"
 
+	find vendor-termux/rustls-platform-verifier -type f -print0 | \
+		xargs -0 sed -i \
+		-e 's|"android"|"disabling_this_because_it_is_for_building_an_apk"|g' \
+		-e "s|ANDROID|DISABLING_THIS_BECAUSE_IT_IS_FOR_BUILDING_AN_APK|g" \
+		-e 's|"linux"|"android"|g'
+
 	cat <<-EOL >> Cargo.toml
 
 		[patch.crates-io]
 		cc = { path = "./vendor-termux/cc" }
+		rustls-platform-verifier = { path = "./vendor-termux/rustls-platform-verifier" }
 		sonic-rs = { path = "./vendor-termux/sonic-rs" }
 		sonic-simd = { path = "./vendor-termux/sonic-simd" }
 	EOL
@@ -78,7 +91,7 @@ termux_step_make() {
 
 termux_step_make_install() {
 	# mise binary
-	install -vDm755 "target/${CARGO_TARGET_NAME}/release/${TERMUX_PKG_NAME}" \
+	install -vDm755 "$CARGO_TARGET_DIR/${CARGO_TARGET_NAME}/release/${TERMUX_PKG_NAME}" \
 		-t "$TERMUX_PREFIX/bin"
 	# man page
 	install -vDm644 "man/man1/mise.1" \

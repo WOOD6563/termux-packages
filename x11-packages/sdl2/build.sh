@@ -3,7 +3,7 @@ TERMUX_PKG_DESCRIPTION="A library for portable low-level access to a video frame
 TERMUX_PKG_LICENSE="ZLIB"
 TERMUX_PKG_MAINTAINER="@termux"
 TERMUX_PKG_VERSION="2.32.10"
-TERMUX_PKG_SRCURL=https://www.libsdl.org/release/SDL2-${TERMUX_PKG_VERSION}.tar.gz
+TERMUX_PKG_SRCURL=https://github.com/libsdl-org/SDL/releases/download/release-${TERMUX_PKG_VERSION}/SDL2-${TERMUX_PKG_VERSION}.tar.gz
 TERMUX_PKG_SHA256=5f5993c530f084535c65a6879e9b26ad441169b3e25d789d83287040a9ca5165
 TERMUX_PKG_DEPENDS="libdecor, libiconv, libwayland, libx11, libxcursor, libxext, libxfixes, libxi, libxkbcommon, libxrandr, libxss, pulseaudio"
 TERMUX_PKG_BUILD_DEPENDS="libwayland-cross-scanner, libwayland-protocols, opengl"
@@ -49,6 +49,20 @@ TERMUX_PKG_EXTRA_CONFIGURE_ARGS="
 --x-includes=${TERMUX_PREFIX}/include
 --x-libraries=${TERMUX_PREFIX}/lib
 "
+
+termux_pkg_auto_update() {
+	local latest_version
+	latest_version="$(
+		git ls-remote --tags https://github.com/libsdl-org/SDL 'refs/tags/release-2.*' |
+			grep -oE 'release-2\.[0-9]+\.[0-9]+$' |
+			sed 's/^release-//' |
+			sort -Vr | head -n1
+	)"
+	if [[ -z "$latest_version" ]]; then
+		termux_error_exit "Unable to determine latest SDL2 release."
+	fi
+	termux_pkg_upgrade_version "$latest_version"
+}
 
 termux_step_post_get_source() {
 	# Do not forget to bump revision of reverse dependencies and rebuild them

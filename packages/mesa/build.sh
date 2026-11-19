@@ -3,9 +3,15 @@ TERMUX_PKG_DESCRIPTION="An open-source implementation of the OpenGL specificatio
 TERMUX_PKG_LICENSE="MIT"
 TERMUX_PKG_LICENSE_FILE="docs/license.rst"
 TERMUX_PKG_MAINTAINER="@termux"
-TERMUX_PKG_VERSION="26.2.2"
-TERMUX_PKG_SRCURL="https://archive.mesa3d.org/mesa-${TERMUX_PKG_VERSION}.tar.xz"
-TERMUX_PKG_SHA256=eeb29ca7e56cfaa8e8a79538dcf834e3b18e501c31bef5145e959ea437cc4216
+TERMUX_PKG_VERSION="26.3.1"
+TERMUX_PKG_SRCURL=(
+	https://archive.mesa3d.org/mesa-${TERMUX_PKG_VERSION}.tar.xz
+	https://gitlab.freedesktop.org/virgl/venus-protocol/-/archive/v1.1.3/venus-protocol-v1.1.3.tar.gz
+)
+TERMUX_PKG_SHA256=(
+	4e4e438eac7b840a9383988cbb7c08dad8041da544b9319fc26d319fa7348961
+	c5a362ca28e0a35042db1baeadaf9183500b216841e49d72714b80bae50b4445
+)
 TERMUX_PKG_AUTO_UPDATE=true
 TERMUX_PKG_DEPENDS="libandroid-shmem, libc++, libdrm, libglvnd, libllvm (<< $TERMUX_LLVM_NEXT_MAJOR_VERSION), libwayland, libx11, libxext, libxfixes, libxshmfence, libxxf86vm, ncurses, vulkan-loader, zlib, zstd"
 TERMUX_PKG_SUGGESTS="mesa-dev"
@@ -32,32 +38,46 @@ TERMUX_PKG_EXTRA_CONFIGURE_ARGS="
 -Dgallium-rusticl=true
 -Dglvnd=enabled
 -Dxmlconfig=disabled
+-Dmesa-clc=system
 "
 
 termux_step_host_build() {
-	if [[ "$TERMUX_ON_DEVICE_BUILD" == "true" ]]; then
-		return
+	# get the elusive mesa_clc program to run during the second stage build
+
+	local srcdir
+	if [[ "$TERMUX_ON_DEVICE_BUILD" == "false" ]]; then
+		srcdir="$TERMUX_PKG_SRCDIR"
+	else
+		srcdir="$TERMUX_PKG_HOSTBUILD_DIR/source"
+		cp -r "$TERMUX_PKG_SRCDIR" "$srcdir"
+		local p
+		for p in "$TERMUX_SCRIPTDIR"/packages/mesa/*.patch; do
+			echo "Applying $(basename "${p}")"
+			sed "s|@TERMUX_PREFIX@|${TERMUX_PREFIX}|g" "${p}" \
+				| patch --silent -p1 -d "$srcdir"
+		done
 	fi
 
-	# get the elusive mesa_clc program to run during cross-compilation
-
-	local p="$TERMUX_PKG_BUILDER_DIR/1001-src-compiler-clc-meson.build.diff.beforehostbuild"
-	echo "Applying $(basename "${p}")"
-	sed \
-		-e "s|@LLVM_OPENCL_INCLUDE_DIR@|/usr/lib/llvm-$TERMUX_HOST_LLVM_MAJOR_VERSION/lib/clang/$TERMUX_HOST_LLVM_MAJOR_VERSION/include|g" \
-		-e "s|@TERMUX_PREFIX@|$TERMUX_PREFIX|g" \
-		"${p}" | patch --silent -p1 -d "$TERMUX_PKG_SRCDIR"
-
-	local HOST_TRIPLET="$(gcc -dumpmachine)"
 	export HOSTBUILD_ROOTFS="${TERMUX_PKG_HOSTBUILD_DIR}/ubuntu_packages"
-	mkdir -p "${HOSTBUILD_ROOTFS}/usr/share/pkgconfig"
-	cp "${TERMUX_PREFIX}/share/pkgconfig/libclc.pc" "${HOSTBUILD_ROOTFS}/usr/share/pkgconfig/"
-	PKG_CONFIG_LIBDIR="${HOSTBUILD_ROOTFS}/usr/lib/x86_64-linux-gnu/pkgconfig"
-	PKG_CONFIG_LIBDIR+=":${HOSTBUILD_ROOTFS}/usr/share/pkgconfig/"
-	PKG_CONFIG_LIBDIR+=":$(grep 'DefaultSearchPaths:' "/usr/share/pkgconfig/personality.d/${HOST_TRIPLET}.personality" | cut -d ' ' -f 2)"
-	export PKG_CONFIG_LIBDIR
-	export PKG_CONFIG_PATH="$PKG_CONFIG_LIBDIR"
-	export PATH="${HOSTBUILD_ROOTFS}/usr/bin:${PATH}"
+
+	if [[ "$TERMUX_ON_DEVICE_BUILD" == "false" ]]; then
+		local p="$TERMUX_PKG_BUILDER_DIR/1001-src-compiler-clc-meson.build.diff.beforehostbuild"
+		echo "Applying $(basename "${p}")"
+		sed \
+			-e "s|@LLVM_OPENCL_INCLUDE_DIR@|/usr/lib/llvm-$TERMUX_HOST_LLVM_MAJOR_VERSION/lib/clang/$TERMUX_HOST_LLVM_MAJOR_VERSION/include|g" \
+			-e "s|@TERMUX_PREFIX@|$TERMUX_PREFIX|g" \
+			"${p}" | patch --silent -p1 -d "$TERMUX_PKG_SRCDIR"
+
+		local HOST_TRIPLET="$(gcc -dumpmachine)"
+		mkdir -p "${HOSTBUILD_ROOTFS}/usr/share/pkgconfig"
+		cp "${TERMUX_PREFIX}/share/pkgconfig/libclc.pc" "${HOSTBUILD_ROOTFS}/usr/share/pkgconfig/"
+		PKG_CONFIG_LIBDIR="${HOSTBUILD_ROOTFS}/usr/lib/x86_64-linux-gnu/pkgconfig"
+		PKG_CONFIG_LIBDIR+=":${HOSTBUILD_ROOTFS}/usr/share/pkgconfig/"
+		PKG_CONFIG_LIBDIR+=":$(grep 'DefaultSearchPaths:' "/usr/share/pkgconfig/personality.d/${HOST_TRIPLET}.personality" | cut -d ' ' -f 2)"
+		export PKG_CONFIG_LIBDIR
+		export PKG_CONFIG_PATH="$PKG_CONFIG_LIBDIR"
+		export PATH="${HOSTBUILD_ROOTFS}/usr/bin:${PATH}"
+	fi
 
 	# XXX: termux_setup_meson is not expected to be called in host build
 	AR=;CC=;CFLAGS=;CPPFLAGS=;CXX=;CXXFLAGS=;LD=;LDFLAGS=;PKG_CONFIG=;STRIP=
@@ -65,34 +85,36 @@ termux_step_host_build() {
 	unset AR CC CFLAGS CPPFLAGS CXX CXXFLAGS LD LDFLAGS PKG_CONFIG STRIP
 	termux_setup_rust
 
-	termux_download_ubuntu_packages \
-		"libllvmspirvlib-$TERMUX_HOST_LLVM_MAJOR_VERSION-dev" \
-		"libllvm$TERMUX_HOST_LLVM_MAJOR_VERSION" \
-		"libllvmspirvlib$TERMUX_HOST_LLVM_MAJOR_VERSION.1" \
-		"libclang-$TERMUX_HOST_LLVM_MAJOR_VERSION-dev" \
-		"libclang-cpp$TERMUX_HOST_LLVM_MAJOR_VERSION-dev" \
-		libz3-4 \
-		spirv-tools-dev \
-		spirv-tools-headers
+	if [[ "$TERMUX_ON_DEVICE_BUILD" == "false" ]]; then
+		termux_download_ubuntu_packages \
+			"libllvmspirvlib-$TERMUX_HOST_LLVM_MAJOR_VERSION-dev" \
+			"libllvm$TERMUX_HOST_LLVM_MAJOR_VERSION" \
+			"libllvmspirvlib$TERMUX_HOST_LLVM_MAJOR_VERSION.1" \
+			"libclang-$TERMUX_HOST_LLVM_MAJOR_VERSION-dev" \
+			"libclang-cpp$TERMUX_HOST_LLVM_MAJOR_VERSION-dev" \
+			libz3-4 \
+			spirv-tools-dev \
+			spirv-tools-headers
 
-	local LLVM_CONFIG_ORIG="/usr/bin/llvm-config-$TERMUX_HOST_LLVM_MAJOR_VERSION"
-	local LLVM_CONFIG_WRAPPER="${HOSTBUILD_ROOTFS}${LLVM_CONFIG_ORIG}"
-	mkdir -p "$(dirname "$LLVM_CONFIG_WRAPPER")"
-	cat <<- EOF > "$LLVM_CONFIG_WRAPPER"
-		#!/bin/bash
-		if [[ "\$1" == "--libdir" ]]; then
-			echo "$HOSTBUILD_ROOTFS/usr/lib/llvm-$TERMUX_HOST_LLVM_MAJOR_VERSION/lib"
-		elif [[ "\$1" == "--includedir" ]]; then
-			echo "$HOSTBUILD_ROOTFS/usr/lib/llvm-$TERMUX_HOST_LLVM_MAJOR_VERSION/include"
-		else
-			$LLVM_CONFIG_ORIG "\$@"
-		fi
-	EOF
-	chmod +x "$LLVM_CONFIG_WRAPPER"
-	export CPPFLAGS="-I$($LLVM_CONFIG_WRAPPER --includedir)"
-	CPPFLAGS+=" -I$HOSTBUILD_ROOTFS/usr/lib/llvm-$TERMUX_HOST_LLVM_MAJOR_VERSION/lib/clang/$TERMUX_HOST_LLVM_MAJOR_VERSION/include"
-	CPPFLAGS+=" -I$HOSTBUILD_ROOTFS/usr/include"
-	export LDFLAGS="-L$HOSTBUILD_ROOTFS/usr/lib/x86_64-linux-gnu"
+		local LLVM_CONFIG_ORIG="/usr/bin/llvm-config-$TERMUX_HOST_LLVM_MAJOR_VERSION"
+		local LLVM_CONFIG_WRAPPER="${HOSTBUILD_ROOTFS}${LLVM_CONFIG_ORIG}"
+		mkdir -p "$(dirname "$LLVM_CONFIG_WRAPPER")"
+		cat <<- EOF > "$LLVM_CONFIG_WRAPPER"
+			#!/bin/bash
+			if [[ "\$1" == "--libdir" ]]; then
+				echo "$HOSTBUILD_ROOTFS/usr/lib/llvm-$TERMUX_HOST_LLVM_MAJOR_VERSION/lib"
+			elif [[ "\$1" == "--includedir" ]]; then
+				echo "$HOSTBUILD_ROOTFS/usr/lib/llvm-$TERMUX_HOST_LLVM_MAJOR_VERSION/include"
+			else
+				$LLVM_CONFIG_ORIG "\$@"
+			fi
+		EOF
+		chmod +x "$LLVM_CONFIG_WRAPPER"
+		export CPPFLAGS="-I$($LLVM_CONFIG_WRAPPER --includedir)"
+		CPPFLAGS+=" -I$HOSTBUILD_ROOTFS/usr/lib/llvm-$TERMUX_HOST_LLVM_MAJOR_VERSION/lib/clang/$TERMUX_HOST_LLVM_MAJOR_VERSION/include"
+		CPPFLAGS+=" -I$HOSTBUILD_ROOTFS/usr/include"
+		export LDFLAGS="-L$HOSTBUILD_ROOTFS/usr/lib/x86_64-linux-gnu"
+	fi
 
 	cargo install --force --locked bindgen-cli
 
@@ -100,7 +122,7 @@ termux_step_host_build() {
 	# if the rest of the mesa build is too minimal,
 	# link-time symbol errors will occur, so it has to have at least LLVM enabled.
 	$TERMUX_MESON setup \
-		"$TERMUX_PKG_SRCDIR" build \
+		"$srcdir" build \
 		--prefix "$HOSTBUILD_ROOTFS/usr" \
 		-Dinstall-mesa-clc=true \
 		-Dmesa-clc=enabled \
@@ -115,12 +137,18 @@ termux_step_host_build() {
 
 	# the mesa_clc program is now in ${HOSTBUILD_ROOTFS}/usr/bin
 	unset AR CC CFLAGS CPPFLAGS CXX CXXFLAGS LD LDFLAGS PKG_CONFIG STRIP PKG_CONFIG_LIBDIR PKG_CONFIG_PATH
-	rm "$LLVM_CONFIG_WRAPPER"
+	if [[ "$TERMUX_ON_DEVICE_BUILD" == "false" ]]; then
+		rm "$LLVM_CONFIG_WRAPPER"
+	fi
 }
 
 termux_step_post_get_source() {
-	# Do not use meson wrap projects
+	# Do not use meson wrap projects, except the bundled venus-protocol
+	mv subprojects/venus-protocol.wrap .
 	rm -rf subprojects
+	mkdir subprojects
+	mv venus-protocol.wrap subprojects/
+	mv venus-protocol-v1.1.3 subprojects/venus-protocol-1.1.3
 }
 
 termux_step_pre_configure() {
@@ -141,12 +169,13 @@ termux_step_pre_configure() {
 	cargo install --force --locked bindgen-cli
 	if [[ "${TERMUX_ON_DEVICE_BUILD}" == "false" ]]; then
 		export BINDGEN_EXTRA_CLANG_ARGS="--sysroot ${TERMUX_STANDALONE_TOOLCHAIN}/sysroot"
-		case "${TERMUX_ARCH}" in
-		arm) BINDGEN_EXTRA_CLANG_ARGS+=" --target=arm-linux-androideabi${TERMUX_PKG_API_LEVEL}" ;;
-		*) BINDGEN_EXTRA_CLANG_ARGS+=" --target=${TERMUX_ARCH}-linux-android${TERMUX_PKG_API_LEVEL}" ;;
-		esac
-		TERMUX_PKG_EXTRA_CONFIGURE_ARGS+=" -Dmesa-clc=system"
+	else
+		export BINDGEN_EXTRA_CLANG_ARGS=""
 	fi
+	case "${TERMUX_ARCH}" in
+	arm) BINDGEN_EXTRA_CLANG_ARGS+=" --target=arm-linux-androideabi${TERMUX_PKG_API_LEVEL}" ;;
+	*) BINDGEN_EXTRA_CLANG_ARGS+=" --target=${TERMUX_ARCH}-linux-android${TERMUX_PKG_API_LEVEL}" ;;
+	esac
 
 	CPPFLAGS+=" -D__USE_GNU"
 	LDFLAGS+=" -landroid-shmem"

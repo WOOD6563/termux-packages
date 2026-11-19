@@ -1,11 +1,10 @@
 TERMUX_PKG_HOMEPAGE=https://github.com/astral-sh/ty
 TERMUX_PKG_DESCRIPTION="An extremely fast Python type checker and language server, written in Rust"
-TERMUX_PKG_VERSION="0.0.80"
+TERMUX_PKG_VERSION="0.0.107"
 TERMUX_PKG_LICENSE="MIT"
-TERMUX_PKG_LICENSE_FILE="LICENSE"
 TERMUX_PKG_MAINTAINER="@termux"
 TERMUX_PKG_SRCURL="https://github.com/astral-sh/ty/releases/download/$TERMUX_PKG_VERSION/source.tar.gz"
-TERMUX_PKG_SHA256=a039d7e66d362e1707fc494f2c69dfdd2eb5333dc8fa9ad582edc125932fa5fa
+TERMUX_PKG_SHA256=c959a244e46b227dd522aceba71150726e9bdbdcf5d0c161f711c2ebf115c545
 TERMUX_PKG_BUILD_IN_SRC=true
 TERMUX_PKG_AUTO_UPDATE=true
 
@@ -40,6 +39,7 @@ termux_step_pre_configure() {
 	local dir="vendor/cc"
 	echo "Applying patch: $patch"
 	patch -p1 -d "$dir" < "$patch"
+	sed -i '/^#!\[deny(warnings)\]/d' "$dir/src/lib.rs"
 
 	echo "" >> Cargo.toml
 	echo '[patch.crates-io]' >> Cargo.toml

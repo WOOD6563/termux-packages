@@ -2,20 +2,23 @@ TERMUX_PKG_HOMEPAGE=https://mega.io/
 TERMUX_PKG_DESCRIPTION="Provides non UI access to MEGA services"
 TERMUX_PKG_LICENSE="BSD 2-Clause"
 TERMUX_PKG_MAINTAINER="@termux"
-TERMUX_PKG_VERSION=("2.5.2"
-					"10.9.0")
-TERMUX_PKG_SRCURL=("https://github.com/meganz/MEGAcmd/archive/refs/tags/${TERMUX_PKG_VERSION[0]}_Linux.tar.gz"
-					"https://github.com/meganz/sdk/archive/refs/tags/v${TERMUX_PKG_VERSION[1]}.tar.gz")
+TERMUX_PKG_VERSION=(
+	"2.7.1"
+	"10.21.1"
+)
+TERMUX_PKG_SRCURL=(
+	"https://github.com/meganz/MEGAcmd/archive/refs/tags/${TERMUX_PKG_VERSION[0]}_Linux.tar.gz"
+	"https://github.com/meganz/sdk/archive/refs/tags/v${TERMUX_PKG_VERSION[1]}.tar.gz"
+)
 TERMUX_PKG_SHA256=(
-	a088c001e9116357fcac92cd0b3d62fb53cc24ce546eb0fb4cc83c53df5eed7c
-	811fcb952b09e765fa3559e370ae5f9b026cc8a297e125847acc8c77cfda01a8
+	a9d636f6f812dea81c0b9ab09045cd822146cdcd3442c882558bfa4a591ae794
+	47f37912dfe86558b5be52b49e5292dec4bd00c551561943b5385723470e432d
 )
 TERMUX_PKG_AUTO_UPDATE=true
 TERMUX_PKG_UPDATE_VERSION_REGEXP="\d+\.\d+\.\d+_Linux"
 TERMUX_PKG_UPDATE_VERSION_SED_REGEXP='s/_Linux//'
-
 # dbus is required for $PREFIX/var/lib/dbus/machine-id
-TERMUX_PKG_DEPENDS="c-ares, cryptopp, dbus, ffmpeg, freeimage, libandroid-glob, libc++, libcurl, libicu, libsodium, libsqlite, libuv, mediainfo, openssl, pcre, readline, zlib"
+TERMUX_PKG_DEPENDS="c-ares, cryptopp, dbus, ffmpeg, freeimage, libandroid-glob, libc++, libcurl, libicu, libsodium, libsqlite, libuv, mediainfo, openssl, pcre2, readline, zlib"
 TERMUX_PKG_EXTRA_CONFIGURE_ARGS="
 -DUSE_FFMPEG=ON
 -DUSE_PCRE=ON
@@ -46,7 +49,7 @@ termux_step_pre_configure() {
 	export OBJCXX="$CXX"
 
 	# -licui18n fixes 'ld.lld: error: undefined symbol: icu_78::Collator::createInstance'
-	LDFLAGS+=" -landroid-glob -lpcrecpp -lz -licui18n"
+	LDFLAGS+=" -landroid-glob -lz -licui18n"
 	LDFLAGS+=" $($CC -print-libgcc-file-name)"
 
 	# Fix build against FFmpeg 6.0:
@@ -54,8 +57,8 @@ termux_step_pre_configure() {
 
 	# treat Android as Linux like sdl2 package
 	rm -rf "$TERMUX_PKG_SRCDIR/sdk/examples"
-	find "$TERMUX_PKG_SRCDIR" -type f | \
-		xargs -n 1 sed -i \
+	find "$TERMUX_PKG_SRCDIR" -type f -print0 | \
+		xargs -0 -n 1 sed -i \
 		-e 's/\([^A-Za-z0-9_]__ANDROID\)\(__[^A-Za-z0-9_]\)/\1_NO_TERMUX\2/g' \
 		-e 's/\([^A-Za-z0-9_]__ANDROID\)__$/\1_NO_TERMUX__/g'
 }

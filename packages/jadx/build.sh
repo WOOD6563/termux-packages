@@ -3,9 +3,9 @@ TERMUX_PKG_DESCRIPTION="Dex to Java decompiler"
 TERMUX_PKG_LICENSE="Apache-2.0"
 TERMUX_PKG_LICENSE_FILE="LICENSE, NOTICE"
 TERMUX_PKG_MAINTAINER="@termux"
-TERMUX_PKG_VERSION="1.5.5"
+TERMUX_PKG_VERSION="1.5.7"
 TERMUX_PKG_SRCURL=https://github.com/skylot/jadx/archive/refs/tags/v${TERMUX_PKG_VERSION}.tar.gz
-TERMUX_PKG_SHA256=8c1af4a9aebd5334367d5d60c8d56b02755b2027f9f8bc6633b5c3afdc273e1a
+TERMUX_PKG_SHA256=c2ed4c394d65364447f2c8aa915de42ab9a45e638ec112918efb4c100751e194
 TERMUX_PKG_DEPENDS="openjdk-21"
 TERMUX_PKG_PLATFORM_INDEPENDENT=true
 TERMUX_PKG_BUILD_IN_SRC=true
@@ -13,7 +13,12 @@ TERMUX_PKG_AUTO_UPDATE=true
 
 termux_step_make() {
 	export JADX_VERSION="$TERMUX_PKG_VERSION"
-	./gradlew clean dist
+
+	(
+		export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+		export PATH="$JAVA_HOME/bin:$PATH"
+		./gradlew clean dist
+	)
 
 	local exe
 	for exe in jadx jadx-gui; do

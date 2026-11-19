@@ -2,10 +2,10 @@ TERMUX_PKG_HOMEPAGE=https://lfortran.org/
 TERMUX_PKG_DESCRIPTION="A modern open-source interactive Fortran compiler"
 TERMUX_PKG_LICENSE="BSD 3-Clause"
 TERMUX_PKG_MAINTAINER="@termux"
-TERMUX_PKG_VERSION="0.66.0"
+TERMUX_PKG_VERSION="0.69.0"
 TERMUX_PKG_SRCURL=https://github.com/lfortran/lfortran/releases/download/v$TERMUX_PKG_VERSION/lfortran-$TERMUX_PKG_VERSION.tar.gz
-TERMUX_PKG_SHA256=961d84f49d07951a279b7835e0f9864489a167a80a8c3c502a797fb6c61669c7
-TERMUX_PKG_DEPENDS="clang, libandroid-complex-math, libc++, ncurses, zlib, zstd"
+TERMUX_PKG_SHA256=d403dd190819f03b53ee2a2d0f1bc39e33a95f220fe43eaaa466ecdb5a2f060d
+TERMUX_PKG_DEPENDS="clang, libandroid-complex-math, libandroid-spawn, libc++, ncurses, zlib, zstd"
 TERMUX_PKG_BUILD_DEPENDS="libkokkos, libkokkos-static, libllvm-static"
 TERMUX_PKG_SUGGESTS="libkokkos"
 TERMUX_PKG_AUTO_UPDATE=true
@@ -36,10 +36,10 @@ TERMUX_PKG_EXCLUDED_ARCHES="arm, i686"
 termux_step_host_build() {
 	termux_setup_cmake
 
-	cmake $TERMUX_PKG_SRCDIR
-	make -j $TERMUX_PKG_MAKE_PROCESSES
+	cmake "$TERMUX_PKG_SRCDIR"
+	make -j "$TERMUX_PKG_MAKE_PROCESSES"
 }
 
 termux_step_pre_configure() {
-	LDFLAGS+=" -landroid-complex-math -lm"
+	LDFLAGS+=" -landroid-complex-math -landroid-spawn -lm"
 }

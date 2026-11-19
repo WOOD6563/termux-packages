@@ -2,9 +2,9 @@ TERMUX_PKG_HOMEPAGE=https://aosc.io/oma
 TERMUX_PKG_DESCRIPTION="oma is an attempt at reworking APT's interface"
 TERMUX_PKG_LICENSE="GPL-3.0"
 TERMUX_PKG_MAINTAINER="@termux"
-TERMUX_PKG_VERSION="1.27.8"
+TERMUX_PKG_VERSION="1.28.4"
 TERMUX_PKG_SRCURL="https://github.com/AOSC-Dev/oma/archive/refs/tags/v${TERMUX_PKG_VERSION}.tar.gz"
-TERMUX_PKG_SHA256=f1881c93f17e5158766fd21fad344a6cf7cabb687609c7a3e1f99e83f7c8fc5c
+TERMUX_PKG_SHA256=0d1ecfe86e58e125672373f5b568e0b74fed6c387ed8e2d60e8e0b30b9c7b3c5
 TERMUX_PKG_DEPENDS="libnettle, apt"
 TERMUX_PKG_RECOMMENDS="ripgrep"
 TERMUX_PKG_BUILD_IN_SRC=true
@@ -44,7 +44,11 @@ termux_step_pre_configure() {
 	fi
 
 	# error: function-like macro '__GLIBC_USE' is not defined
-	export BINDGEN_EXTRA_CLANG_ARGS_${CARGO_TARGET_NAME//-/_}="--sysroot ${TERMUX_STANDALONE_TOOLCHAIN}/sysroot --target=${CARGO_TARGET_NAME}"
+	export BINDGEN_EXTRA_CLANG_ARGS="--sysroot ${TERMUX_STANDALONE_TOOLCHAIN}/sysroot"
+	case "${TERMUX_ARCH}" in
+	arm) BINDGEN_EXTRA_CLANG_ARGS+=" --target=arm-linux-androideabi${TERMUX_PKG_API_LEVEL}" ;;
+	*) BINDGEN_EXTRA_CLANG_ARGS+=" --target=${TERMUX_ARCH}-linux-android${TERMUX_PKG_API_LEVEL}" ;;
+	esac
 	CXXFLAGS+=" $CPPFLAGS"
 }
 

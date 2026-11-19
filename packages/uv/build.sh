@@ -3,10 +3,9 @@ TERMUX_PKG_DESCRIPTION="An extremely fast Python package installer and resolver,
 TERMUX_PKG_LICENSE="Apache-2.0, MIT"
 TERMUX_PKG_LICENSE_FILE="LICENSE-APACHE, LICENSE-MIT"
 TERMUX_PKG_MAINTAINER="@termux"
-TERMUX_PKG_VERSION="0.12.13"
+TERMUX_PKG_VERSION="0.13.9"
 TERMUX_PKG_SRCURL=https://github.com/astral-sh/uv/archive/refs/tags/${TERMUX_PKG_VERSION}.tar.gz
-TERMUX_PKG_SHA256=6fed06d051682d521335fb26cd422bc652e5e15b87ea87ab13353b89d865fe40
-TERMUX_PKG_DEPENDS="zstd"
+TERMUX_PKG_SHA256=66b26bd860dd35790bd7e3b721bbb3d39451cb18e3ff25fb0557d25a26f06c00
 TERMUX_PKG_BUILD_IN_SRC=true
 TERMUX_PKG_AUTO_UPDATE=true
 
@@ -30,7 +29,7 @@ termux_step_pre_configure() {
 
 termux_step_make() {
 	PKG_CONFIG_ALL_DYNAMIC=1 \
-	ZSTD_SYS_USE_PKG_CONFIG=1 \
+	CFLAGS= \
 	cargo build --jobs "${TERMUX_PKG_MAKE_PROCESSES}" --target "${CARGO_TARGET_NAME}" --release
 }
 
