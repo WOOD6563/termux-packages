@@ -2,9 +2,10 @@ TERMUX_PKG_HOMEPAGE=https://go.dev/
 TERMUX_PKG_DESCRIPTION="Go programming language compiler"
 TERMUX_PKG_LICENSE="BSD 3-Clause"
 TERMUX_PKG_MAINTAINER="@termux"
-TERMUX_PKG_VERSION="3:1.27.0"
+TERMUX_PKG_VERSION="3:1.27.4"
+TERMUX_PKG_REVISION=1
 TERMUX_PKG_SRCURL="https://go.dev/dl/go${TERMUX_PKG_VERSION#*:}.src.tar.gz"
-TERMUX_PKG_SHA256=7002403d7cc44529ef6d26f69a44818263395ead7c16c05a5808ae047ebeb0e5
+TERMUX_PKG_SHA256=73cfb8571aec0c01177687db87163d46aa20e9779672772891aa17654d9a6099
 TERMUX_PKG_DEPENDS="clang"
 TERMUX_PKG_ANTI_BUILD_DEPENDS="clang"
 TERMUX_PKG_RECOMMENDS="resolv-conf"
@@ -15,6 +16,7 @@ termux_step_post_get_source() {
 	. "$TERMUX_PKG_BUILDER_DIR/patch-script/fix-hardcoded-etc-resolv-conf.sh"
 	. "$TERMUX_PKG_BUILDER_DIR/patch-script/remove-pidfd.sh"
 	. "$TERMUX_PKG_BUILDER_DIR/patch-script/remove-futex_time64.sh"
+	. "$TERMUX_PKG_BUILDER_DIR/patch-script/fix-android-netlink.sh"
 }
 
 termux_step_make_install() {

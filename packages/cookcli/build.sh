@@ -1,11 +1,10 @@
 TERMUX_PKG_HOMEPAGE=https://cooklang.org
 TERMUX_PKG_DESCRIPTION="A suite of tools to create shopping lists and maintain food recipes"
 TERMUX_PKG_LICENSE="MIT"
-TERMUX_PKG_LICENSE_FILE="LICENSE"
 TERMUX_PKG_MAINTAINER="@termux"
-TERMUX_PKG_VERSION="0.34.0"
-TERMUX_PKG_SRCURL=https://github.com/cooklang/cookcli/archive/refs/tags/v${TERMUX_PKG_VERSION}.tar.gz
-TERMUX_PKG_SHA256=300a38aff510178dfd057d134735bc80fd4acbbc28ad5f8f5ca18a9235249fd5
+TERMUX_PKG_VERSION="0.41.1"
+TERMUX_PKG_SRCURL="https://github.com/cooklang/cookcli/archive/refs/tags/v${TERMUX_PKG_VERSION}.tar.gz"
+TERMUX_PKG_SHA256=1e5c4160245d91f1667c5e55d0c6bbd977ac6b7565889bc01b38c462d7e2d95d
 TERMUX_PKG_DEPENDS="openssl"
 TERMUX_PKG_BUILD_IN_SRC=true
 TERMUX_PKG_AUTO_UPDATE=true

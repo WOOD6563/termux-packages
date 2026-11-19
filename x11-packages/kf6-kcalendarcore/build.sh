@@ -7,9 +7,9 @@ LICENSES/LGPL-2.0-or-later.txt
 LICENSES/LGPL-3.0-or-later.txt
 "
 TERMUX_PKG_MAINTAINER="@termux"
-TERMUX_PKG_VERSION="6.29.0"
+TERMUX_PKG_VERSION="6.32.0"
 TERMUX_PKG_SRCURL="https://download.kde.org/stable/frameworks/${TERMUX_PKG_VERSION%.*}/kcalendarcore-${TERMUX_PKG_VERSION}.tar.xz"
-TERMUX_PKG_SHA256=0c5801f9c50d4fea4a183876a887068a4b73d9f5545453dbcd1cd17ec46e2300
+TERMUX_PKG_SHA256=65c7b0111140833a0a54cbbc303890e03d3d91469ace4e272e1b76aa2135dba7
 TERMUX_PKG_AUTO_UPDATE=true
 TERMUX_PKG_DEPENDS="libc++, libical, qt6-qtbase, qt6-qtdeclarative"
 TERMUX_PKG_BUILD_DEPENDS="extra-cmake-modules, qt6-qttools"

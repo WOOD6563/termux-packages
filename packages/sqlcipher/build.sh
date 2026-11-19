@@ -2,13 +2,13 @@ TERMUX_PKG_HOMEPAGE=https://github.com/sqlcipher/sqlcipher
 TERMUX_PKG_DESCRIPTION="SQLCipher is an SQLite extension that provides 256 bit AES encryption of database files"
 TERMUX_PKG_LICENSE="BSD"
 TERMUX_PKG_MAINTAINER="@termux"
-TERMUX_PKG_VERSION="4.18.0"
+TERMUX_PKG_VERSION="4.20.0"
 TERMUX_PKG_SRCURL="https://github.com/sqlcipher/sqlcipher/archive/refs/tags/v$TERMUX_PKG_VERSION.tar.gz"
-TERMUX_PKG_SHA256=1df02d1b346fa27feaf2da2cb2c0d8209e788248e461ec288718aa5d3e9643e5
+TERMUX_PKG_SHA256=38705f51b61ac0636a5fd064f9a77fafabc7227b2aa2513f1b14c8bb1102affc
 TERMUX_PKG_DEPENDS="libedit, openssl"
 TERMUX_PKG_BUILD_DEPENDS="tcl"
 TERMUX_PKG_AUTO_UPDATE=true
-TERMUX_PKG_UPDATE_TAG_TYPE="newest-tag"
+TERMUX_PKG_UPDATE_TAG_TYPE="latest-release-tag"
 # will overwrite libsqlite during installation
 TERMUX_PKG_ON_DEVICE_BUILD_NOT_SUPPORTED=true
 # --enable-editline --disable-readline

@@ -2,10 +2,9 @@ TERMUX_PKG_HOMEPAGE=https://github.com/Canop/broot
 TERMUX_PKG_DESCRIPTION="A better way to navigate directories"
 TERMUX_PKG_LICENSE="MIT"
 TERMUX_PKG_MAINTAINER="@termux"
-TERMUX_PKG_VERSION="1.59.0"
+TERMUX_PKG_VERSION="1.62.0"
 TERMUX_PKG_SRCURL=https://github.com/Canop/broot/archive/refs/tags/v${TERMUX_PKG_VERSION}.tar.gz
-TERMUX_PKG_SHA256=61cb29922ef3953bae7f696b9f33fef51d85b5a4d85075c3612fcc6824663c37
-TERMUX_PKG_DEPENDS="libgit2"
+TERMUX_PKG_SHA256=7c3445a6eef45fe67fe2e1f4e0e1f9dca796237d6303615e31b07798cc1716ba
 TERMUX_PKG_BUILD_IN_SRC=true
 TERMUX_PKG_AUTO_UPDATE=true
 
@@ -17,10 +16,6 @@ termux_step_pre_configure() {
 
 	cargo fetch --target "${CARGO_TARGET_NAME}"
 
-	local f
-	for f in $CARGO_HOME/registry/src/*/libgit2-sys-*/build.rs; do
-		sed -i -E 's/\.range_version\(([^)]*)\.\.[^)]*\)/.atleast_version(\1)/g' "${f}"
-	done
 	sed -i '/trash/d' $TERMUX_PKG_SRCDIR/Cargo.toml
 }
 

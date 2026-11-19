@@ -2,9 +2,10 @@ TERMUX_PKG_HOMEPAGE=https://pkg.go.dev/golang.org/x/vuln/cmd/govulncheck
 TERMUX_PKG_DESCRIPTION="Reports known vulnerabilities affecting Go code"
 TERMUX_PKG_LICENSE="BSD"
 TERMUX_PKG_MAINTAINER="Gouranga Das Samrat <gouranga.das.khulna@gmail.com>"
-TERMUX_PKG_VERSION=1.7.0
+TERMUX_PKG_VERSION="1.10.0"
 TERMUX_PKG_SRCURL=https://github.com/golang/vuln/archive/refs/tags/v${TERMUX_PKG_VERSION}.tar.gz
-TERMUX_PKG_SHA256=4fb7f0204b7e039f550d8938b714c5218d870694895585e0e19b2c0c4700e4c7
+TERMUX_PKG_SHA256=7ed6972819c5fb627aee623d20b91d5cad7a7afd07405de03a74094bc6d8db96
+TERMUX_PKG_UPDATE_TAG_TYPE=newest-tag
 TERMUX_PKG_AUTO_UPDATE=true
 TERMUX_PKG_BUILD_IN_SRC=true
 

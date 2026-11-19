@@ -3,9 +3,9 @@ TERMUX_PKG_DESCRIPTION="Ambitious Vim-fork focused on extensibility and agility 
 TERMUX_PKG_LICENSE="Apache-2.0, VIM License"
 TERMUX_PKG_LICENSE_FILE="LICENSE.txt"
 TERMUX_PKG_MAINTAINER="Joshua Kahn <tom@termux.dev>"
-TERMUX_PKG_VERSION="0.13.0~dev-1410+g510f61555b"
+TERMUX_PKG_VERSION="0.13.0~dev-2146+g158f7d603e"
 TERMUX_PKG_SRCURL="https://github.com/neovim/neovim/archive/${TERMUX_PKG_VERSION##*+g}.tar.gz"
-TERMUX_PKG_SHA256=b240ce6b15b328b96fba57a963df0e52d7bf0b124f6ba12b0014e64692eef452
+TERMUX_PKG_SHA256=89dc1d147f5181ff53d368dcb086cf779ab21dd37bfe49b26733d348aebd1a19
 TERMUX_PKG_REPOLOGY_METADATA_VERSION="${TERMUX_PKG_VERSION%%~*}"
 TERMUX_PKG_DEPENDS="libandroid-support, libiconv, libmsgpack, libunibilium, libuv, libvterm (>= 1:0.3-0), lua51-lpeg, luajit, luv, tree-sitter, tree-sitter-parsers, utf8proc"
 TERMUX_PKG_BREAKS="neovim"
@@ -81,7 +81,7 @@ termux_step_host_build() {
 	cp -vf ./build/bin/nvim "$TERMUX_PKG_HOSTBUILD_DIR/"
 
 	make distclean
-	rm -Rf build/
+	rm -rf build/
 }
 
 termux_step_post_make_install() {

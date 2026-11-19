@@ -3,17 +3,16 @@ TERMUX_PKG_DESCRIPTION="A file list program that supports multiple storage"
 TERMUX_PKG_LICENSE="AGPL-3.0"
 TERMUX_PKG_MAINTAINER="2096779623 <admin@utermux.dev>"
 TERMUX_PKG_VERSION=(
-	"4.2.5"
-	"4.2.5" # Web Frontend
+	"4.2.10"
+	"4.2.10" # Web Frontend
 )
-TERMUX_PKG_REVISION=1
 TERMUX_PKG_SRCURL=(
 	"https://github.com/OpenListTeam/OpenList/archive/refs/tags/v${TERMUX_PKG_VERSION[0]}.tar.gz"
 	"https://github.com/OpenListTeam/OpenList-Frontend/releases/download/v${TERMUX_PKG_VERSION[1]}/openlist-frontend-dist-v${TERMUX_PKG_VERSION[1]}.tar.gz"
 )
 TERMUX_PKG_SHA256=(
-	dd9f19bb4dc9b8a06bb839dff91eb69833b2b9c77a9bfe82fc8caf1f47e97df1
-	78e957e5b8855e30d00767458ab90ec11125a0344a238cc1e1990f46553d4308
+	4e45a675ee4719a98038a64f0f2095bd82146bb7342466f42d2407f5d3e701f7
+	4e137046ef350ca847bff145824ed2ffe9948a05c39a6e269b80c69eb13fc636
 )
 TERMUX_PKG_AUTO_UPDATE=true
 TERMUX_PKG_BUILD_IN_SRC=true
@@ -103,7 +102,7 @@ termux_step_make() {
 	local ldflags
 	local _builtAt=$(date +'%F %T %z')
 	local _goVersion=$(go version | sed 's/go version //')
-	local _gitAuthor="The OpenList Projects Contributors <noreply@openlist.team>"
+	local _gitAuthor="The OpenList Projects Contributors <noreply@oplist.org>"
 	local _gitCommit=$(git ls-remote https://github.com/OpenListTeam/OpenList "refs/tags/v${TERMUX_PKG_VERSION[0]}" | head -c 7)
 	export CGO_ENABLED=1
 

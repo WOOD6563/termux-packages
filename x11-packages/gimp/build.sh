@@ -2,8 +2,8 @@ TERMUX_PKG_HOMEPAGE=https://www.gimp.org/
 TERMUX_PKG_DESCRIPTION="GNU Image Manipulation Program"
 TERMUX_PKG_LICENSE="GPL-3.0, LGPL-3.0"
 TERMUX_PKG_MAINTAINER="@termux"
-TERMUX_PKG_VERSION="3.2.0"
-TERMUX_PKG_REVISION=4
+TERMUX_PKG_VERSION="3.2.8"
+TERMUX_PKG_REVISION=2
 TERMUX_PKG_SRCURL=git+https://gitlab.gnome.org/GNOME/gimp
 TERMUX_PKG_GIT_BRANCH="GIMP_${TERMUX_PKG_VERSION//./_}"
 TERMUX_PKG_AUTO_UPDATE=true
@@ -37,9 +37,15 @@ termux_step_pre_configure() {
 	export GLIB_COMPILE_RESOURCES=glib-compile-resources
 
 	if [ "$TERMUX_ON_DEVICE_BUILD" = "false" ]; then
+		local _native_rsvg_prefix="$TERMUX_PKG_TMPDIR/native-rsvg"
+		mkdir -p "$_native_rsvg_prefix"
+		DESTINATION="$_native_rsvg_prefix" termux_download_ubuntu_packages librsvg2-2 librsvg2-dev
+		sed -i "s|^prefix=/usr$|prefix=$_native_rsvg_prefix/usr|" \
+			"$_native_rsvg_prefix/usr/lib/x86_64-linux-gnu/pkgconfig/librsvg-2.0.pc"
+
 		# Gimp requires using cross-compiled or prebuilt gimp during cross-compilation which is hard to achive here
 		# gimp is required only to generate splash image, so it will be fine to use official appimage.
-		termux_download https://download.gimp.org/gimp/v${TERMUX_PKG_VERSION%.*}/linux/GIMP-${TERMUX_PKG_VERSION}-x86_64.AppImage "$TERMUX_PKG_CACHEDIR/gimp.appimage" e7794ebd6ed90fe32f6dede3917216aaceee833bdc794f2a0fe925e1d96cc899
+		termux_download https://download.gimp.org/gimp/v${TERMUX_PKG_VERSION%.*}/linux/GIMP-${TERMUX_PKG_VERSION}-x86_64.AppImage "$TERMUX_PKG_CACHEDIR/gimp.appimage" 8b43dc23e58a1b66ace9dd6d4d5f7e8532f3398e6109f95a1ec0b6ad036aa250
 		chmod +x "$TERMUX_PKG_CACHEDIR/gimp.appimage"
 		[ -d $TERMUX_PKG_CACHEDIR/squashfs-root ] || (cd "$TERMUX_PKG_CACHEDIR"; "$TERMUX_PKG_CACHEDIR/gimp.appimage" --appimage-extract)
 
@@ -75,6 +81,7 @@ termux_step_pre_configure() {
 		cat > "$TERMUX_PKG_TMPDIR/bin/pkg-config" <<-HERE
 			#!$(command -v bash)
 			unset PKG_CONFIG_DIR PKG_CONFIG_LIBDIR
+			export PKG_CONFIG_PATH="$_native_rsvg_prefix/usr/lib/x86_64-linux-gnu/pkgconfig\${PKG_CONFIG_PATH:+:\$PKG_CONFIG_PATH}"
 			if [ "\$1" = "--variable=g_ir_scanner" ] && [ "\$2" = "gobject-introspection-1.0" ]; then
 				echo "$TERMUX_PKG_TMPDIR/bin/g-ir-scanner"
 				exit 0

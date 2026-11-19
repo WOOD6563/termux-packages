@@ -2,12 +2,13 @@ TERMUX_PKG_HOMEPAGE="https://dandavison.github.io/delta/"
 TERMUX_PKG_DESCRIPTION="A syntax-highlighter for git and diff output"
 TERMUX_PKG_LICENSE="MIT"
 TERMUX_PKG_MAINTAINER="Joshua Kahn <tom@termux.dev>"
-TERMUX_PKG_VERSION="0.19.2"
+TERMUX_PKG_VERSION="0.21.1"
 TERMUX_PKG_SRCURL=https://github.com/dandavison/delta/archive/refs/tags/${TERMUX_PKG_VERSION}.tar.gz
-TERMUX_PKG_SHA256=f59b86f8c8dda4d76a3ba34b8553777a20c3b461646917d8e480fac6531bba9f
+TERMUX_PKG_SHA256=2fc82657d692dec135fce408b3f20c9ab6c23198ed35a983e79a04c5fb133f04
 TERMUX_PKG_AUTO_UPDATE=true
 TERMUX_PKG_DEPENDS="git, libgit2, oniguruma"
 TERMUX_PKG_BUILD_IN_SRC=true
+TERMUX_PKG_EXTRA_CONFIGURE_ARGS="--no-default-features"
 
 termux_step_pre_configure() {
 	export LIBGIT2_SYS_USE_PKG_CONFIG=1
